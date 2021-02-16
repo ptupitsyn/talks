@@ -24,6 +24,7 @@ namespace Benchmarks
         [GlobalSetup]
         public void GlobalSetup()
         {
+            // In-process Ignite server node.
             var ignite = Ignition.Start();
 
             // In-process cache (unmanaged memory + optional persistence).
