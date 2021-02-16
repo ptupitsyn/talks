@@ -7,7 +7,8 @@ using var ignite = Ignition.Start();
 var cfg = new CacheConfiguration
 {
     Name = "person",
-    CacheMode = CacheMode.Replicated
+    CacheMode = CacheMode.Replicated,
+    PlatformCacheConfiguration = new PlatformCacheConfiguration()
 };
 
 var cache = ignite.GetOrCreateCache<int, Person>(cfg);
