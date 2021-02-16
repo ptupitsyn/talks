@@ -14,13 +14,13 @@ var cfg = new CacheConfiguration
 
 var cache = ignite.GetOrCreateCache<int, Person>(cfg);
 
-if (!cache.PutIfAbsent(1, new Person("Ivan", 29)))
+if (cache.TryLocalPeek(1, out var res, CachePeekMode.Platform))
 {
-    var res = cache.LocalPeek(1, CachePeekMode.Platform);
     Console.WriteLine(">>> Value from cache: " + res);
 }
 else
 {
+    cache.PutIfAbsent(1, new Person("Ivan", 29));
     Console.WriteLine(">>> Value written to cache");
 }
 
