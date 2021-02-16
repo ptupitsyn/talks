@@ -1,4 +1,6 @@
 ﻿using System;
+using BenchmarkDotNet.Running;
+using StackExchange.Redis;
 
 namespace Benchmarks
 {
@@ -6,7 +8,12 @@ namespace Benchmarks
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            // ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("127.0.0.1");
+            //
+            // var db = redis.GetDatabase();
+            // db.StringSet("k", "v");
+
+            BenchmarkRunner.Run<CacheGetRedisIgnite>();
         }
     }
 }
