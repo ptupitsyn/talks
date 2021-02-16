@@ -39,30 +39,19 @@ namespace Benchmarks
                 PlatformCacheConfiguration = new PlatformCacheConfiguration()
             });
 
-            _ignite.Put("1", "2");
-            _igniteClr.Put("1", "2");
-
             // docker run -d -p 6379:6379 redis
             _redis = ConnectionMultiplexer.Connect("127.0.0.1").GetDatabase();
+
+            // Default data.
+            _ignite.Put("1", "2");
+            _igniteClr.Put("1", "2");
             _redis.StringSet("1", "2");
         }
 
-        [Benchmark(Baseline = true)]
-        public void GetIgniteClrHeap()
-        {
-            _igniteClr.Get("1");
-        }
+        [Benchmark(Baseline = true)] public void GetIgniteClrHeap() => _igniteClr.Get("1");
 
-        [Benchmark]
-        public void GetIgnite()
-        {
-            _ignite.Get("1");
-        }
+        [Benchmark] public void GetIgnite() => _ignite.Get("1");
 
-        [Benchmark]
-        public void GetRedis()
-        {
-            _redis.StringGet("1");
-        }
+        [Benchmark] public void GetRedis() => _redis.StringGet("1");
     }
 }
