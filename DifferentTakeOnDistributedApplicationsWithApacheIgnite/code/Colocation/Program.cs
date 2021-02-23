@@ -30,8 +30,8 @@ for (int i = 0; i < 10; i++)
 
 Thread.Sleep(200); // Wait for rebalance
 
-Console.WriteLine(">>> Node 1:" + postsCache1.GetLocalEntries().Count());
-Console.WriteLine(">>> Node 2:" + postsCache2.GetLocalEntries().Count());
+Console.WriteLine(">>> Node 1: " + postsCache1.GetLocalEntries().Count());
+Console.WriteLine(">>> Node 2: " + postsCache2.GetLocalEntries().Count());
 
 Console.ReadKey();
 
