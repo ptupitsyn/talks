@@ -2,7 +2,6 @@ using Apache.Ignite.Core;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Configuration;
 using BenchmarkDotNet.Attributes;
-using Dapr.Client;
 using StackExchange.Redis;
 
 namespace Benchmarks
@@ -21,8 +20,6 @@ namespace Benchmarks
         private ICache<string, string> _ignite;
 
         private ICache<string, string> _igniteClr;
-
-        private DaprClient _dapr;
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -46,10 +43,6 @@ namespace Benchmarks
             // Redis: docker run -d -p 6379:6379 redis
             _redis = ConnectionMultiplexer.Connect("127.0.0.1").GetDatabase();
 
-            // Dapr: dapr run dotnet run -c Release
-            _dapr = new DaprClientBuilder().Build();
-            _dapr.SaveStateAsync("statestore", "1", "2").GetAwaiter().GetResult();
-
             // Default data.
             _ignite.Put("1", "2");
             _igniteClr.Put("1", "2");
@@ -61,7 +54,5 @@ namespace Benchmarks
         [Benchmark] public void GetIgnite() => _ignite.Get("1");
 
         [Benchmark] public void GetRedis() => _redis.StringGet("1");
-
-        [Benchmark] public void GetDapr() => _dapr.GetStateAsync<string>("statestore", "1");
     }
 }
