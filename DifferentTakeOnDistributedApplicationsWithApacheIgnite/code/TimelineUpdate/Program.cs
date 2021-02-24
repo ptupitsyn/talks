@@ -21,7 +21,10 @@ followers.Put(bloggerId, followerIds);
 
 // Create new post.
 Console.ReadKey();
+
 NewPost(bloggerId, "Hello, World!");
+
+Console.ReadKey();
 
 void NewPost(UserKey userKey, string text)
 {
