@@ -5,6 +5,7 @@ using Apache.Ignite.Core;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Affinity;
 
+// Run this multiple times to create the distributed environment.
 using var ignite = Ignition.Start();
 
 var idGen = ignite.GetAtomicSequence(name: "id", initialValue: 0, create: true);
