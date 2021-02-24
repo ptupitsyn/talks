@@ -27,6 +27,8 @@ for (int part = 0; part < RendezvousAffinityFunction.DefaultPartitions; part++)
     ignite.GetCompute().AffinityRun(cacheNames: new[]{posts.Name}, partition: part, action: new Scanner(part));
 }
 
+Console.ReadKey();
+
 record Post(string Text, bool Banned);
 
 class Scanner : IComputeAction
@@ -51,13 +53,13 @@ class Scanner : IComputeAction
 
         foreach (var cacheEntry in cache.Query(query))
         {
-            Console.WriteLine($"Processing entry {cacheEntry}...");
-
             if (cacheEntry.Value.Text.Contains("7"))
             {
                 // Digit 7 is banned today.
                 cache.Put(cacheEntry.Key, cacheEntry.Value with {Banned = true});
             }
+
+            Console.WriteLine($"Entry processed: {cacheEntry.Key}");
         }
     }
 }
