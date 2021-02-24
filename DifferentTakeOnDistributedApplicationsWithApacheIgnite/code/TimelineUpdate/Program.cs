@@ -4,27 +4,35 @@ using System.Linq;
 using Apache.Ignite.Core;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Affinity;
+using Apache.Ignite.Core.Log;
 
 // Run this multiple times to create the distributed environment.
-using var ignite = Ignition.Start();
+using var ignite = Ignition.Start(new IgniteConfiguration
+{
+    Logger = new ConsoleLogger {MinLevel = LogLevel.Error},
+    JvmOptions = new[]{"-DIGNITE_QUIET=false"}
+});
 
 var idGen = ignite.GetAtomicSequence(name: "id", initialValue: 0, create: true);
-var users = ignite.GetOrCreateCache<UserKey, User>("user");
+
+// Create caches (tables).
 var posts = ignite.GetOrCreateCache<PostKey, Post>("post");
 var followers = ignite.GetOrCreateCache<UserKey, IList<UserKey>>("follower");
 var timelines = ignite.GetOrCreateCache<UserKey, IList<PostKey>>("timeline");
 
 // Create users.
 var bloggerId = new UserKey(idGen.Increment());
-var followerIds = Enumerable.Range(1, 10).Select(_ => new UserKey(idGen.Increment())).ToList();
+var followerIds = Enumerable.Range(1, 20).Select(_ => new UserKey(idGen.Increment())).ToList();
 followers.Put(bloggerId, followerIds);
 
 // Create new post.
+Console.WriteLine(">>> Ready");
 Console.ReadKey();
 
 NewPost(bloggerId, "Hello, World!");
 
 Console.ReadKey();
+
 
 void NewPost(UserKey userKey, string text)
 {
@@ -41,8 +49,6 @@ void NewPost(UserKey userKey, string text)
         timelines.InvokeAll(userFollowers, new TimelineUpdater(), postKey);
     }
 }
-
-record User(string Name);
 
 record UserKey(long Id);
 
