@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Apache.Ignite.Core;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Affinity;
 
-// TODO: Use separate program to demonstrate colocated updates?
 using var ignite = Ignition.Start();
 
 var idGen = ignite.GetAtomicSequence(name: "id", initialValue: 0, create: true);
@@ -13,19 +13,22 @@ var posts = ignite.GetOrCreateCache<PostKey, Post>("post");
 var followers = ignite.GetOrCreateCache<UserKey, IList<UserKey>>("follower");
 var timelines = ignite.GetOrCreateCache<UserKey, IList<PostKey>>("timeline");
 
+// Create users.
+var bloggerId = new UserKey(idGen.Increment());
+var followerIds = Enumerable.Range(1, 10).Select(_ => new UserKey(idGen.Increment())).ToList();
+followers.Put(bloggerId, followerIds);
 
-void NewPost(int userId, string text)
+// Create new post.
+Console.ReadKey();
+NewPost(bloggerId, "Hello, World!");
+
+void NewPost(UserKey userKey, string text)
 {
-    var userKey = new UserKey(userId);
-    var postKey = new PostKey(idGen.Increment(), userKey);
-
     // Create the post.
+    var postKey = new PostKey(idGen.Increment(), userKey);
     posts.Put(postKey, new Post(text));
 
-    // Add post to user's public timeline
-    // Assume we are on the primary already
-
-    // Add post to every follower's timeline
+    // Add post to every follower's timeline.
     var userFollowers = followers.TryGet(userKey, out var res) ? res : Array.Empty<UserKey>();
 
     if (userFollowers.Count > 0)
@@ -37,7 +40,7 @@ void NewPost(int userId, string text)
 
 record User(string Name);
 
-record UserKey(int Id);
+record UserKey(long Id);
 
 record Post(string Text);
 
@@ -51,8 +54,11 @@ class TimelineUpdater : ICacheEntryProcessor<UserKey, IList<PostKey>, PostKey, o
 {
     public object Process(IMutableCacheEntry<UserKey, IList<PostKey>> entry, PostKey arg)
     {
-        entry.Value.Add(arg);
-        entry.Value = entry.Value; // Force update
+        Console.WriteLine($">>> Updating timeline for user {entry.Key} with post {arg}...");
+
+        var posts = entry.Exists ? entry.Value : new List<PostKey>();
+        posts.Add(arg);
+        entry.Value = posts;
 
         return null;
     }
