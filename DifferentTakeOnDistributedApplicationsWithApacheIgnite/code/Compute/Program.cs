@@ -13,7 +13,7 @@ using var ignite = Ignition.Start(new IgniteConfiguration
 
 // Create caches (tables).
 var posts = ignite.GetOrCreateCache<long, Post>("post");
-for (int i = 0; i < 100; i++)
+for (int i = 0; i < 10; i++)
 {
     posts[i] = new Post($"Foo {i} bar", false);
 }
@@ -24,6 +24,7 @@ Console.ReadKey();
 
 for (int part = 0; part < RendezvousAffinityFunction.DefaultPartitions; part++)
 {
+    // AffinityRun locks the partition in place and guarantees that all data is available during execution.
     ignite.GetCompute().AffinityRun(cacheNames: new[]{posts.Name}, partition: part, action: new Scanner(part));
 }
 
