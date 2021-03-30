@@ -29,6 +29,6 @@ public class Person : IBinarizable
         Name = reader.ReadString("Name");
         Age = reader.ReadInt("Age");
 
-        Console.WriteLine("\n>>>> Value Deserialized: " + Name);
+        Console.WriteLine($"\n>>>> Value Deserialized: {Name}\n");
     }
 }
