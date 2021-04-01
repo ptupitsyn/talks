@@ -1,8 +1,13 @@
 ﻿using System;
 using Apache.Ignite.Core;
 using Apache.Ignite.Core.Cache.Configuration;
+using Apache.Ignite.Core.Log;
 
-using var ignite = Ignition.Start();
+using var ignite = Ignition.Start(new IgniteConfiguration
+{
+    Logger = new ConsoleLogger {MinLevel = LogLevel.Error},
+    JvmOptions = new[]{"-DIGNITE_QUIET=false"}
+});
 
 var cfg = new CacheConfiguration
 {
