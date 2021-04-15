@@ -37,10 +37,10 @@ class Scanner : IComputeAction
 {
     public Scanner(int partition)
     {
-        Partiton = partition;
+        Partition = partition;
     }
 
-    public int Partiton { get; set; }
+    public int Partition { get; set; }
 
     public void Invoke()
     {
@@ -48,7 +48,7 @@ class Scanner : IComputeAction
         // All operations here are guaranteed to be local and don't involve any network calls.
         var query = new ScanQuery<long, Post>
         {
-            Partition = Partiton
+            Partition = Partition
         };
 
         var cache = Ignition.GetIgnite().GetCache<long, Post>("post");
