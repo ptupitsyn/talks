@@ -15,11 +15,10 @@ var cfg = new IgniteConfiguration
 using var ignite1 = Ignition.Start(cfg);
 using var ignite2 = Ignition.Start(cfg);
 
-// Start without colocation and show the problem, then fix it.
-var accountsCache1 = ignite1.GetOrCreateCache<int, User>("account");
-var accountsCache2 = ignite2.GetOrCreateCache<int, User>("account");
-
 // Same cache referenced from different nodes.
+var accountsCache1 = ignite1.GetOrCreateCache<int, User>("user");
+var accountsCache2 = ignite2.GetOrCreateCache<int, User>("user");
+
 var postsCache1 = ignite1.GetOrCreateCache<PostKey, Post>("post");
 var postsCache2 = ignite2.GetOrCreateCache<PostKey, Post>("post");
 
