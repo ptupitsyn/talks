@@ -40,18 +40,18 @@ class Scanner : IComputeAction
         Partition = partition;
     }
 
-    public int Partition { get; set; }
+    public int Partition { get; }
 
     public void Invoke()
     {
+        var cache = Ignition.GetIgnite().GetCache<long, Post>("post");
+
         // Scan specified partition.
         // All operations here are guaranteed to be local and don't involve any network calls.
         var query = new ScanQuery<long, Post>
         {
             Partition = Partition
         };
-
-        var cache = Ignition.GetIgnite().GetCache<long, Post>("post");
 
         foreach (var cacheEntry in cache.Query(query))
         {

@@ -41,9 +41,7 @@ void NewPost(UserKey userKey, string text)
     posts.Put(postKey, new Post(text));
 
     // Add post to every follower's timeline.
-    var userFollowers = followers.TryGet(userKey, out var res) ? res : Array.Empty<UserKey>();
-
-    if (userFollowers.Count > 0)
+    if (followers.TryGet(userKey, out var userFollowers))
     {
         // Send updates to primary nodes for every follower.
         timelines.InvokeAll(userFollowers, new TimelineUpdater(), postKey);
