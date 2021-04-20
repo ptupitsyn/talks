@@ -1,6 +1,7 @@
 ﻿using System;
 using Apache.Ignite.Core;
 using Apache.Ignite.Core.Binary;
+using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Log;
 
 using var ignite = Ignition.Start(new IgniteConfiguration
