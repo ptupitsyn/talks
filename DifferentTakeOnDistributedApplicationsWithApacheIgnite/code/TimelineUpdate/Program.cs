@@ -47,7 +47,10 @@ void NewPost(UserKey userKey, string text)
     if (followers.TryGet(userKey, out var userFollowers))
     {
         // Send updates to primary nodes for every follower.
-        timelines.InvokeAll(userFollowers, new TimelineUpdater(), postKey);
+        timelines.InvokeAll(
+            keys: userFollowers,
+            processor: new TimelineUpdater(),
+            arg: postKey);
     }
 }
 

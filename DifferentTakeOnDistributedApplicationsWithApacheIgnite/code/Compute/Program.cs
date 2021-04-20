@@ -65,7 +65,9 @@ class Scanner : IComputeAction
             if (cacheEntry.Value.Text.Contains("7"))
             {
                 // Digit 7 is banned today.
-                cache.Put(cacheEntry.Key, cacheEntry.Value with {Banned = true});
+                cache.Put(
+                    key: cacheEntry.Key,
+                    val: cacheEntry.Value with {Banned = true});
             }
 
             Console.WriteLine($"Entry processed: {cacheEntry.Key}");
