@@ -22,7 +22,10 @@ var timelines = ignite.GetOrCreateCache<UserKey, IList<PostKey>>("timeline");
 
 // Create users.
 var bloggerId = new UserKey(idGen.Increment());
-var followerIds = Enumerable.Range(1, 20).Select(_ => new UserKey(idGen.Increment())).ToList();
+var followerIds = Enumerable.Range(1, 20)
+    .Select(_ => new UserKey(idGen.Increment()))
+    .ToList();
+
 followers.Put(bloggerId, followerIds);
 
 // Create new post.

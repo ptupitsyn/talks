@@ -1,6 +1,7 @@
 ﻿using System;
 using Apache.Ignite.Core;
 using Apache.Ignite.Core.Binary;
+using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Log;
 
 using var ignite = Ignition.Start(new IgniteConfiguration
@@ -9,7 +10,7 @@ using var ignite = Ignition.Start(new IgniteConfiguration
     JvmOptions = new[]{"-DIGNITE_QUIET=false"}
 });
 
-var cache = ignite.GetCache<int, Person>("person");
+ICache<int, Person> cache = ignite.GetCache<int, Person>("person");
 
 // Console.WriteLine(">>>>> Value from cache: " + cache.Get(1));
 Console.ReadKey();

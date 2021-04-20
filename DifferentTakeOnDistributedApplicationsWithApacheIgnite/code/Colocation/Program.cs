@@ -23,10 +23,10 @@ var postsCache1 = ignite1.GetOrCreateCache<PostKey, Post>("post");
 var postsCache2 = ignite2.GetOrCreateCache<PostKey, Post>("post");
 
 var userId = 0;
-accountsCache1[userId] = new ("Ivan");
+accountsCache1[userId] = new User("Ivan");
 
 for (int i = 0; i < 10; i++)
-    postsCache1[new(i, userId)] = new ("Text");
+    postsCache1[new(i, userId)] = new Post("Text");
 
 Thread.Sleep(200); // Wait for rebalance
 

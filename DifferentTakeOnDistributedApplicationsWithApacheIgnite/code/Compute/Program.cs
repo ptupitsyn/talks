@@ -1,5 +1,6 @@
 ﻿using System;
 using Apache.Ignite.Core;
+using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Affinity.Rendezvous;
 using Apache.Ignite.Core.Cache.Query;
 using Apache.Ignite.Core.Compute;
@@ -25,8 +26,12 @@ Console.ReadKey();
 
 for (int part = 0; part < RendezvousAffinityFunction.DefaultPartitions; part++)
 {
-    // AffinityRun locks the partition in place and guarantees that all data is available locally during execution.
-    ignite.GetCompute().AffinityRun(cacheNames: new[]{posts.Name}, partition: part, action: new Scanner(part));
+    // AffinityRun locks the partition in place
+    // and guarantees that all data is available locally during execution.
+    ignite.GetCompute().AffinityRun(
+        cacheNames: new[]{posts.Name},
+        partition: part,
+        action: new Scanner(part));
 }
 
 Console.ReadKey();
@@ -53,7 +58,9 @@ class Scanner : IComputeAction
             Partition = Partition
         };
 
-        foreach (var cacheEntry in cache.Query(query))
+        IQueryCursor<ICacheEntry<long,Post>> cursor = cache.Query(query);
+
+        foreach (var cacheEntry in cursor)
         {
             if (cacheEntry.Value.Text.Contains("7"))
             {
