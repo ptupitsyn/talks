@@ -22,3 +22,5 @@ Console.WriteLine();
 public sealed record Employee(string Name, DateTime StartDate);
 
 public sealed record EmployeeKey(int CompanyId, string Id);
+
+// dotnet publish --runtime linux-x64 /p:PublishSingleFile=true /p:IncludeAllContentForSelfExtract=true --self-contained true --output pub
