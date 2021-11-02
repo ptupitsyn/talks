@@ -8,16 +8,17 @@ var stopwatch = Stopwatch.StartNew();
 
 var clientConfiguration = new IgniteClientConfiguration("127.0.0.1:10800")
 {
-    Logger = new ConsoleLogger { MinLevel = LogLevel.Trace }
+    Logger = new ConsoleLogger { MinLevel = LogLevel.Debug }
 };
 
 using var client = Ignition.StartClient(clientConfiguration);
 
-Console.WriteLine($"Client started in {stopwatch.Elapsed}.");
-stopwatch.Restart();
+Console.WriteLine($"Client connected in {stopwatch.Elapsed}.");
 
 var cache = client.CreateCache<Guid, Car>("cars");
+
 const int count = 100_000;
+stopwatch.Restart();
 
 using (var streamer = client.GetDataStreamer<Guid, Car>(cache.Name))
 {
