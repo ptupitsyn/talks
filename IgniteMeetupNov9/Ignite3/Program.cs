@@ -1,19 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using Apache.Ignite;
+using Apache.Ignite.Log;
 using Apache.Ignite.Table;
 
 // Connect.
-var cfg = new IgniteClientConfiguration("127.0.0.1:10800");
+var cfg = new IgniteClientConfiguration("127.0.0.1:10800")
+{
+    Logger = new ConsoleLogger { MinLevel = LogLevel.Debug }
+};
+
 using var client = await IgniteClient.StartAsync(cfg);
 
 // Print table names.
-var tables = await client.Tables.GetTablesAsync();
+IList<ITable> tables = await client.Tables.GetTablesAsync();
 
 foreach (var t in tables)
     Console.WriteLine(t.Name);
 
 // Get table by name.
-ITable table = await client.Tables.GetTableAsync("PUBLIC.accounts");
+ITableView<IIgniteTuple> table = await client.Tables.GetTableAsync("PUBLIC.accounts");
 Console.WriteLine("Table exists: " + (table != null));
 
 // Insert row.
