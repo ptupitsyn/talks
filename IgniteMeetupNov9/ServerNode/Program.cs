@@ -8,6 +8,8 @@ using var ignite = Ignition.Start(new IgniteConfiguration
     // JvmOptions = new[]{"-DIGNITE_QUIET=false"}
 });
 
+ignite.GetOrCreateCache<object, object>("cars");
+
 Console.WriteLine(">>> Started!");
 
 Console.ReadKey();

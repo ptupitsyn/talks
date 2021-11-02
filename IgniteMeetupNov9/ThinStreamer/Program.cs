@@ -15,12 +15,10 @@ using var client = Ignition.StartClient(clientConfiguration);
 
 Console.WriteLine($"Client connected in {stopwatch.Elapsed}.");
 
-var cache = client.CreateCache<Guid, Car>("cars");
-
 const int count = 100_000;
 stopwatch.Restart();
 
-using (var streamer = client.GetDataStreamer<Guid, Car>(cache.Name))
+using (var streamer = client.GetDataStreamer<Guid, Car>("cars"))
 {
     for (int i = 0; i < count; i++)
     {
