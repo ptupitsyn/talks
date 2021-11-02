@@ -16,14 +16,11 @@ using var client = Ignition.StartClient(clientConfiguration);
 Console.WriteLine($"Client connected in {stopwatch.Elapsed}.");
 
 const int count = 100_000;
-stopwatch.Restart();
 
 using (var streamer = client.GetDataStreamer<Guid, Car>("cars"))
 {
-    for (int i = 0; i < count; i++)
-    {
+    for (var i = 0; i < count; i++)
         streamer.Add(Guid.NewGuid(), new Car($"abc-{i}", i));
-    }
 }
 
 Console.WriteLine($"Streamed {count} entries in {stopwatch.Elapsed}.");
