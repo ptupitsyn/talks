@@ -33,7 +33,7 @@ var row = new IgniteTuple
 
 await table.UpsertAsync(row);
 
-// Reuse row instance.
+// Reuse tuple instance.
 row["accountNumber"] = 103;
 row["balance"] = (double)400;
 row["firstName"] = "X";
