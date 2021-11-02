@@ -23,7 +23,7 @@ ITableView<IIgniteTuple> table = await client.Tables.GetTableAsync("PUBLIC.accou
 Console.WriteLine("Table exists: " + (table != null));
 
 // Insert row.
-var row = new IgniteTuple
+IIgniteTuple row = new IgniteTuple
 {
     ["accountNumber"] = 101,
     ["balance"] = (double)300,
