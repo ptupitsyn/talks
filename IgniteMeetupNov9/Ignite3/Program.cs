@@ -33,6 +33,14 @@ var row = new IgniteTuple
 
 await table.UpsertAsync(row);
 
+// Reuse row instance.
+row["accountNumber"] = 103;
+row["balance"] = (double)400;
+row["firstName"] = "X";
+row["firstName"] = "Y";
+
+await table.UpsertAsync(row);
+
 // Get row by key.
 var key = new IgniteTuple();
 key["accountNumber"] = 101;
