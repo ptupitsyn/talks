@@ -1,12 +1,20 @@
 ﻿using Npgsql;
 
-using var conn = new NpgsqlConnection("db-host");
-conn.Open();
+namespace ImplementingDbDriver;
 
-using var cmd = new NpgsqlCommand("SELECT Name FROM User", conn);
-using var reader = cmd.ExecuteReader();
-
-while (reader.Read())
+public static class PgQuery
 {
-    Console.WriteLine(reader.GetString(0));
+    public static void Run()
+    {
+        using var conn = new NpgsqlConnection("db-host");
+        conn.Open();
+
+        using var cmd = new NpgsqlCommand("SELECT Name FROM User", conn);
+        using var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            Console.WriteLine(reader.GetString(0));
+        }
+    }
 }
