@@ -9,7 +9,11 @@ public static class PgQuery
         using var conn = new NpgsqlConnection("db-host");
         conn.Open();
 
-        using var cmd = new NpgsqlCommand("SELECT Name FROM User", conn);
+        using var cmd = new NpgsqlCommand("SELECT Name FROM User WHERE CompanyId = @cid", conn)
+        {
+            Parameters = { new("cid", 123L) }
+        };
+
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
