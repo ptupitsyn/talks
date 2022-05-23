@@ -25,6 +25,7 @@ public class ProtocolBenchmarks
         // var r = new ProtocolBenchmarks();
         // r.GlobalSetup();
         // Console.WriteLine(r.Grpc().GetAwaiter().GetResult());
+        // Console.WriteLine(r.Socket().GetAwaiter().GetResult());
 
         BenchmarkRunner.Run<ProtocolBenchmarks>();
     }
@@ -97,11 +98,11 @@ public class ProtocolBenchmarks
     {
         var pooledArr = ArrayPool<byte>.Shared.Rent(100);
 
-        await socket.ReceiveAsync(pooledArr, SocketFlags.None);
+        await socket.ReceiveAsync(pooledArr.AsMemory()[..4], SocketFlags.None);
 
         var len = BitConverter.ToInt32(pooledArr);
 
-        var buf = pooledArr.AsMemory()[len..];
+        var buf = pooledArr.AsMemory()[..len];
         await socket.ReceiveAsync(buf, SocketFlags.None);
 
         var res = Encoding.UTF8.GetString(buf.Span);
