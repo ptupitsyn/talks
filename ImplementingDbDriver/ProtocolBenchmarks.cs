@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using BenchmarkDotNet.Attributes;
@@ -6,6 +7,8 @@ using BenchmarkDotNet.Running;
 using Grpc.Core;
 
 namespace ImplementingDbDriver;
+
+#pragma warning disable CS4014 // Task is not awaited.
 
 /// <summary>
 /// Compares "Hello World" exchange using HTTP, gRPC and raw Socket APIs.
@@ -38,7 +41,20 @@ public class ProtocolBenchmarks
         grpcServer.Start();
 
         // Socket.
-        using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+        var listenerSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+        listenerSocket.Bind(new IPEndPoint(IPAddress.Loopback, SocketPort));
+        listenerSocket.Listen(backlog: 1);
+
+        Task.Run(async () =>
+        {
+            while (true)
+            {
+                using var clientSocket = await listenerSocket.AcceptAsync();
+                var userName = await ReceiveString(clientSocket);
+                var greeting = "Hello " + userName;
+                await SendString(clientSocket, greeting);
+            }
+        });
     }
 
     [Benchmark]
@@ -47,26 +63,8 @@ public class ProtocolBenchmarks
         using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
         await socket.ConnectAsync("localhost", SocketPort);
 
-        await socket.SendAsync(BitConverter.GetBytes(UserName.Length), SocketFlags.None);
-        await socket.SendAsync(Encoding.UTF8.GetBytes(UserName), SocketFlags.None);
-
-        var lenBytes = new byte[4];
-        await socket.ReceiveAsync(lenBytes, SocketFlags.None);
-
-        var len = BitConverter.ToInt32(lenBytes);
-
-        var pooledArr = ArrayPool<byte>.Shared.Rent(len);
-        try
-        {
-            var buf = pooledArr.AsMemory()[len..];
-            await socket.ReceiveAsync(buf, SocketFlags.None);
-            var res = Encoding.UTF8.GetString(buf.Span);
-            return res;
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(pooledArr);
-        }
+        await SendString(socket, UserName);
+        return await ReceiveString(socket);
     }
 
     [Benchmark]
@@ -87,6 +85,29 @@ public class ProtocolBenchmarks
         await channel.ShutdownAsync();
 
         return reply.Message;
+    }
+
+    private static async Task SendString(Socket socket, string val)
+    {
+        await socket.SendAsync(BitConverter.GetBytes(val.Length), SocketFlags.None);
+        await socket.SendAsync(Encoding.UTF8.GetBytes(val), SocketFlags.None);
+    }
+
+    private static async Task<string> ReceiveString(Socket socket)
+    {
+        var pooledArr = ArrayPool<byte>.Shared.Rent(100);
+
+        await socket.ReceiveAsync(pooledArr, SocketFlags.None);
+
+        var len = BitConverter.ToInt32(pooledArr);
+
+        var buf = pooledArr.AsMemory()[len..];
+        await socket.ReceiveAsync(buf, SocketFlags.None);
+
+        var res = Encoding.UTF8.GetString(buf.Span);
+        ArrayPool<byte>.Shared.Return(pooledArr);
+
+        return res;
     }
 
     private class GrpcServer : Greeter.GreeterBase
