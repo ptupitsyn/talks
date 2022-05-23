@@ -13,11 +13,11 @@ namespace ImplementingDbDriver;
 /// <summary>
 /// Compares "Hello World" exchange using HTTP, gRPC and Socket APIs.
 ///
-/// | Method |      Mean |    Error |   StdDev |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
-/// |------- |----------:|---------:|---------:|-------:|-------:|-------:|----------:|
-/// | Socket |  77.31 us | 0.558 us | 0.522 us | 0.7324 |      - |      - |      5 KB |
-/// |   Http | 180.03 us | 3.556 us | 4.497 us | 8.7891 | 2.9297 | 0.4883 |     48 KB |
-/// |   Grpc | 320.92 us | 1.226 us | 1.087 us | 0.4883 |      - |      - |      4 KB |
+/// | Method |      Mean |    Error |   StdDev | Ratio | RatioSD |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
+/// |------- |----------:|---------:|---------:|------:|--------:|-------:|-------:|-------:|----------:|
+/// | Socket |  77.25 us | 0.459 us | 0.430 us |  1.00 |    0.00 | 0.7324 |      - |      - |      5 KB |
+/// |   Http | 179.15 us | 3.582 us | 3.350 us |  2.32 |    0.04 | 9.7656 | 3.4180 | 0.9766 |     48 KB |
+/// |   Grpc | 321.17 us | 1.406 us | 1.246 us |  4.16 |    0.03 | 0.4883 |      - |      - |      4 KB |
 /// </summary>
 [MemoryDiagnoser]
 public class ProtocolBenchmarks
@@ -88,7 +88,7 @@ public class ProtocolBenchmarks
         });
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public async Task<string> Socket()
     {
         using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
