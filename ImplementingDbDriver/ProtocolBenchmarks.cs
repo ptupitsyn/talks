@@ -16,8 +16,9 @@ namespace ImplementingDbDriver;
 [MemoryDiagnoser]
 public class ProtocolBenchmarks
 {
-    private const int GrpcPort = 30051;
-    private const int SocketPort = 10900;
+    private const int GrpcPort = 10001;
+    private const int HttpPort = 10002;
+    private const int SocketPort = 10003;
     private const string UserName = "John Doe";
 
     public static void Run()
@@ -26,6 +27,7 @@ public class ProtocolBenchmarks
         // r.GlobalSetup();
         // Console.WriteLine(r.Grpc().GetAwaiter().GetResult());
         // Console.WriteLine(r.Socket().GetAwaiter().GetResult());
+        // Console.WriteLine(r.Http().GetAwaiter().GetResult());
 
         BenchmarkRunner.Run<ProtocolBenchmarks>();
     }
@@ -56,6 +58,28 @@ public class ProtocolBenchmarks
                 await SendString(clientSocket, greeting);
             }
         });
+
+        // Http.
+        var httpListener = new HttpListener
+        {
+            Prefixes = { $"http://localhost:{HttpPort}/" }
+        };
+
+        httpListener.Start();
+
+        Task.Run(async () =>
+        {
+            while (true)
+            {
+                var ctx = await httpListener.GetContextAsync();
+                var reader = new StreamReader(ctx.Request.InputStream);
+                var userName = await reader.ReadToEndAsync();
+                var greeting = "Hello " + userName;
+
+                await ctx.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(greeting));
+                ctx.Response.Close();
+            }
+        });
     }
 
     [Benchmark]
@@ -69,16 +93,17 @@ public class ProtocolBenchmarks
     }
 
     [Benchmark]
-    public void Http()
+    public async Task<string> Http()
     {
-        // TODO
-
+        var http = new HttpClient();
+        var response = await http.PostAsync("http://localhost:" + HttpPort, new StringContent(UserName));
+        return await response.Content.ReadAsStringAsync();
     }
 
     [Benchmark]
     public async Task<string> Grpc()
     {
-        var channel = new Channel("127.0.0.1:30051", ChannelCredentials.Insecure);
+        var channel = new Channel("127.0.0.1:" + GrpcPort, ChannelCredentials.Insecure);
 
         var client = new Greeter.GreeterClient(channel);
         var reply = await client.SayHelloAsync(new HelloRequest { Name = UserName });

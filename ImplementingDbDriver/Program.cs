@@ -1,5 +1,6 @@
 using ImplementingDbDriver;
 
-ConnectSocket.Run();
-PgQuery.Run();
-RedisQuery.Run();
+ProtocolBenchmarks.Run();
+// ConnectSocket.Run();
+// PgQuery.Run();
+// RedisQuery.Run();
