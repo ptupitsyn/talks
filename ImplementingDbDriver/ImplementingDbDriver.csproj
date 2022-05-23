@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
     <PackageReference Include="Npgsql" Version="6.0.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
   </ItemGroup>
