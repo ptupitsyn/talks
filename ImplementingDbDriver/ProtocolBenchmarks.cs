@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Grpc.Core;
 
 namespace ImplementingDbDriver;
 
@@ -9,13 +10,29 @@ namespace ImplementingDbDriver;
 [MemoryDiagnoser]
 public class ProtocolBenchmarks
 {
+    private const int GrpcPort = 30051;
+
     public static void Run()
     {
         BenchmarkRunner.Run<ProtocolBenchmarks>();
     }
 
+    [GlobalSetup]
+    public void GlobalSetup()
+    {
+        // gRPC.
+        var grpcServer = new Server
+        {
+            Services = { Greeter.BindService(new GrpcServer()) },
+            Ports = { new ServerPort("localhost", GrpcPort, ServerCredentials.Insecure) }
+        };
+        grpcServer.Start();
+
+        // Raw socket.
+    }
+
     [Benchmark]
-    public void RawSocket()
+    public async Task RawSocket()
     {
         // TODO
     }
@@ -28,9 +45,23 @@ public class ProtocolBenchmarks
     }
 
     [Benchmark]
-    public void Grpc()
+    public async Task<string> Grpc()
     {
-        // TODO
+        var channel = new Channel("127.0.0.1:30051", ChannelCredentials.Insecure);
 
+        var client = new Greeter.GreeterClient(channel);
+        var reply = await client.SayHelloAsync(new HelloRequest { Name = "John Doe" });
+
+        await channel.ShutdownAsync();
+
+        return reply.Message;
+    }
+
+    private class GrpcServer : Greeter.GreeterBase
+    {
+        public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
+        {
+            return Task.FromResult(new HelloReply { Message = "Hello " + request.Name });
+        }
     }
 }
