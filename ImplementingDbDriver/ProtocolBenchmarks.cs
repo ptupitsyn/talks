@@ -14,6 +14,10 @@ public class ProtocolBenchmarks
 
     public static void Run()
     {
+        // var r = new ProtocolBenchmarks();
+        // r.GlobalSetup();
+        // Console.WriteLine(r.Grpc().GetAwaiter().GetResult());
+
         BenchmarkRunner.Run<ProtocolBenchmarks>();
     }
 
