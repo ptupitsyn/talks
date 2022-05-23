@@ -6,6 +6,7 @@ namespace ImplementingDbDriver;
 /// <summary>
 /// Compares "Hello World" exchange using HTTP, gRPC and raw Socket APIs.
 /// </summary>
+[MemoryDiagnoser]
 public class ProtocolBenchmarks
 {
     public static void Run()
