@@ -115,25 +115,40 @@ public class ProtocolBenchmarks
 
     private static async Task SendString(Socket socket, string val)
     {
-        await socket.SendAsync(BitConverter.GetBytes(val.Length), SocketFlags.None);
-        await socket.SendAsync(Encoding.UTF8.GetBytes(val), SocketFlags.None);
+        var pooledArr = ArrayPool<byte>.Shared.Rent(100);
+
+        try
+        {
+            BitConverter.TryWriteBytes(pooledArr.AsSpan(), val.Length);
+            var byteLen = Encoding.UTF8.GetBytes(val, pooledArr.AsSpan()[4..]);
+
+            await socket.SendAsync(pooledArr.AsMemory()[..(byteLen + 4)], SocketFlags.None);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(pooledArr);
+        }
     }
 
     private static async Task<string> ReceiveString(Socket socket)
     {
         var pooledArr = ArrayPool<byte>.Shared.Rent(100);
 
-        await socket.ReceiveAsync(pooledArr.AsMemory()[..4], SocketFlags.None);
+        try
+        {
+            await socket.ReceiveAsync(pooledArr.AsMemory()[..4], SocketFlags.None);
 
-        var len = BitConverter.ToInt32(pooledArr);
+            var len = BitConverter.ToInt32(pooledArr);
 
-        var buf = pooledArr.AsMemory()[..len];
-        await socket.ReceiveAsync(buf, SocketFlags.None);
+            var buf = pooledArr.AsMemory()[..len];
+            await socket.ReceiveAsync(buf, SocketFlags.None);
 
-        var res = Encoding.UTF8.GetString(buf.Span);
-        ArrayPool<byte>.Shared.Return(pooledArr);
-
-        return res;
+            return Encoding.UTF8.GetString(buf.Span);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(pooledArr);
+        }
     }
 
     private class GrpcServer : Greeter.GreeterBase
