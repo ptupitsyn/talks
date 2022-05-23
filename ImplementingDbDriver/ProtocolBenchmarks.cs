@@ -1,3 +1,6 @@
+using System.Buffers;
+using System.Net.Sockets;
+using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Grpc.Core;
@@ -11,6 +14,8 @@ namespace ImplementingDbDriver;
 public class ProtocolBenchmarks
 {
     private const int GrpcPort = 30051;
+    private const int SocketPort = 10900;
+    private const string UserName = "John Doe";
 
     public static void Run()
     {
@@ -32,13 +37,36 @@ public class ProtocolBenchmarks
         };
         grpcServer.Start();
 
-        // Raw socket.
+        // Socket.
+        using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
     }
 
     [Benchmark]
-    public async Task RawSocket()
+    public async Task<string> Socket()
     {
-        // TODO
+        using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+        await socket.ConnectAsync("localhost", SocketPort);
+
+        await socket.SendAsync(BitConverter.GetBytes(UserName.Length), SocketFlags.None);
+        await socket.SendAsync(Encoding.UTF8.GetBytes(UserName), SocketFlags.None);
+
+        var lenBytes = new byte[4];
+        await socket.ReceiveAsync(lenBytes, SocketFlags.None);
+
+        var len = BitConverter.ToInt32(lenBytes);
+
+        var pooledArr = ArrayPool<byte>.Shared.Rent(len);
+        try
+        {
+            var buf = pooledArr.AsMemory()[len..];
+            await socket.ReceiveAsync(buf, SocketFlags.None);
+            var res = Encoding.UTF8.GetString(buf.Span);
+            return res;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(pooledArr);
+        }
     }
 
     [Benchmark]
@@ -54,7 +82,7 @@ public class ProtocolBenchmarks
         var channel = new Channel("127.0.0.1:30051", ChannelCredentials.Insecure);
 
         var client = new Greeter.GreeterClient(channel);
-        var reply = await client.SayHelloAsync(new HelloRequest { Name = "John Doe" });
+        var reply = await client.SayHelloAsync(new HelloRequest { Name = UserName });
 
         await channel.ShutdownAsync();
 
