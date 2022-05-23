@@ -11,7 +11,13 @@ namespace ImplementingDbDriver;
 #pragma warning disable CS4014 // Task is not awaited.
 
 /// <summary>
-/// Compares "Hello World" exchange using HTTP, gRPC and raw Socket APIs.
+/// Compares "Hello World" exchange using HTTP, gRPC and Socket APIs.
+///
+/// | Method |      Mean |    Error |   StdDev |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
+/// |------- |----------:|---------:|---------:|-------:|-------:|-------:|----------:|
+/// | Socket |  77.31 us | 0.558 us | 0.522 us | 0.7324 |      - |      - |      5 KB |
+/// |   Http | 180.03 us | 3.556 us | 4.497 us | 8.7891 | 2.9297 | 0.4883 |     48 KB |
+/// |   Grpc | 320.92 us | 1.226 us | 1.087 us | 0.4883 |      - |      - |      4 KB |
 /// </summary>
 [MemoryDiagnoser]
 public class ProtocolBenchmarks
